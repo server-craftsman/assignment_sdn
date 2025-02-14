@@ -1,0 +1,14 @@
+.env
+node_modules
+dist
+.idea
+.vscode
+.DS_Store
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Runtime data
+pids
