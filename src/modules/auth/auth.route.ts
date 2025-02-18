@@ -21,16 +21,6 @@ export default class AuthRoute implements IRoute {
         // POST domain:/api/auth -> Login normal
         this.router.post(API_PATH.AUTH_LOGIN, validationMiddleware(LoginDto), this.authController.login);
 
-        // POST domain:/api/auth/register -> Register normal
-        this.router.post(API_PATH.AUTH_REGISTER, authMiddleWare([UserRoleEnum.ADMIN]), validationMiddleware(RegisterDto), this.authController.register);
-
-        // POST domain:/api/auth/verify-token -> Verify token
-        // this.router.post(
-        //     API_PATH.AUTH_VERIFY_TOKEN,
-        //     // validationMiddleware(VerifiedTokenDto),
-        //     this.authController.verifiedToken,
-        // );
-
         // GET domain:/api/auth -> Get Current Login User -> Require Login
         this.router.get(this.path, authMiddleWare([], true), this.authController.getCurrentLoginUser);
 
