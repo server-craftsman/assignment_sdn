@@ -7,7 +7,7 @@ export interface IUser extends Document {
     _id: string;
     name: string; // required
     email: string; // unique
-    password?: string; // required if google_id is null or empty
+    password?: string;
     role: UserRole; // default is "student"
     description?: string; // required if role is instructor
     phone_number?: string; // default empty

@@ -8,7 +8,7 @@ export const createToken = (user: IUser): TokenData => {
     const secret: string = process.env.JWT_TOKEN_SECRET!;
     const expiresIn: number = 28800;
     return {
-        token: jwt.sign(dataInToken, secret, { expiresIn }),
+        token: jwt.sign(dataInToken, secret, { expiresIn }), // create token with dataInToken, secret and expiresIn
     };
 };
 

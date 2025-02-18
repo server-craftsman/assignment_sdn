@@ -79,9 +79,9 @@ export default class UserController {
         try {
             const model: ChangePasswordDto = req.body;
             await this.userService.changePassword(model);
-            res.status(HttpStatus.OK).json(formatResponse<string>('Password changed successfully'));
+            res.status(HttpStatus.OK).json(formatResponse<null>(null));
         } catch (error) {
             next(error);
         }
-    }
+    };
 }

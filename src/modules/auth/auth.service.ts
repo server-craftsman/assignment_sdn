@@ -19,7 +19,7 @@ export default class AuthService {
 
         let emailCheck = model.email;
 
-        const user = await this.userSchema.findOne({ email: emailCheck }).exec();
+        const user = await this.userSchema.findOne({ email: emailCheck }).exec(); // find user by email by using exec() optimize query performance
         if (!user) {
             throw new HttpException(HttpStatus.BAD_REQUEST, `Your email: ${emailCheck} is not exists.`);
         }
@@ -27,7 +27,7 @@ export default class AuthService {
 
         // login normal
         if (model.password) {
-            const isMatchPassword = await bcryptjs.compare(model.password, user.password!);
+            const isMatchPassword = await bcryptjs.compare(model.password, user.password!); // compare password user input with user password in database
             if (!isMatchPassword) {
                 throw new HttpException(HttpStatus.BAD_REQUEST, `Your password is incorrect!`);
             }
@@ -40,31 +40,8 @@ export default class AuthService {
         return createToken(user);
     }
 
-    public async register(model: RegisterDto): Promise<IUser> {
-        if (isEmptyObject(model)) {
-            throw new HttpException(HttpStatus.BAD_REQUEST, 'Model user is empty');
-        }
-
-        const existingUser = await this.userSchema.findOne({ email: model.email }).exec();
-        if (existingUser) {
-            throw new HttpException(HttpStatus.BAD_REQUEST, 'Email is already in use');
-        }
-
-        const hashedPassword = await bcryptjs.hash(model.password, 10);
-        const user = await this.userSchema.create({
-            ...model,
-            password: hashedPassword,
-            is_verified: false,
-            token_version: uuidv4(),
-            created_at: new Date(),
-            updated_at: new Date(),
-        });
-
-        return user;
-    }
-
     public async getCurrentLoginUser(userId: string): Promise<IUser> {
-        const user = await this.userSchema.findById(userId).lean();
+        const user = await this.userSchema.findById(userId).lean(); // find user by id by using lean() optimize memory performance
         if (!user) {
             throw new HttpException(HttpStatus.BAD_REQUEST, `User is not exists.`);
         }

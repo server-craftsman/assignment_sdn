@@ -1,14 +1,9 @@
 import { Router } from 'express';
 import { API_PATH } from '../../core/constants';
 import { IRoute } from '../../core/interfaces';
-import { authMiddleWare, validationMiddleware } from '../../core/middleware';
-import RegisterDto from './dtos/register.dto';
-import SearchPaginationUserDto from './dtos/searchPaginationUser.dto';
-import UpdateUserDto from './dtos/updateUser.dto';
+import { authMiddleWare } from '../../core/middleware';
 import UserController from './user.controller';
 import { UserRoleEnum } from './user.enum';
-import ChangeRoleDto from './dtos/changeRole.dto';
-import ChangePasswordDto from './dtos/changePassword.dto';
 
 export default class UserRoute implements IRoute {
     public path = API_PATH.USER;
@@ -25,16 +20,7 @@ export default class UserRoute implements IRoute {
         this.router.post(
             `${this.path}/create`,
             authMiddleWare([UserRoleEnum.ADMIN]),
-            validationMiddleware(RegisterDto),
             this.userController.createUser,
-        );
-
-        // POST domain:/api/users/search -> Get all users includes params: keyword, status, role
-        this.router.post(
-            `${this.path}/search`,
-            authMiddleWare([UserRoleEnum.ADMIN]),
-            validationMiddleware(SearchPaginationUserDto),
-            this.userController.getUsers,
         );
 
         // GET domain:/api/users/ -> Get all users

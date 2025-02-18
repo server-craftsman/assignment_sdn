@@ -8,7 +8,7 @@ import { v4 as uuidv4 } from "uuid";
 
 const authMiddleWare = (roles?: UserRole[], isClient = false): RequestHandler => {
     return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-        const authHeader = req.headers['authorization'];
+        const authHeader = req.headers['authorization']; // access token from header
 
         if (isClient) {
             if (!authHeader) {
@@ -43,7 +43,7 @@ const handleCheckToken = async (
         }
 
         try {
-            const userToken = jwt.verify(token, process.env.JWT_TOKEN_SECRET ?? '') as DataStoredInToken;
+            const userToken = jwt.verify(token, process.env.JWT_TOKEN_SECRET ?? '') as DataStoredInToken; // decode token
             if (!req.user) {
                 req.user = { id: '', role: null, version: 0 };
             }

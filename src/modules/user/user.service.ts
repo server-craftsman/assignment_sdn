@@ -5,15 +5,11 @@ import { IError } from '../../core/interfaces';
 import { checkValidUrl, encodePasswordUserNormal, isEmptyObject } from '../../core/utils';
 import RegisterDto from './dtos/register.dto';
 import ChangeRoleDto from './dtos/changeRole.dto';
-import SearchUserDto from './dtos/searchUser.dto';
 import UpdateUserDto from './dtos/updateUser.dto';
 import ChangePasswordDto from './dtos/changePassword.dto';
 import { UserRoleEnum } from './user.enum';
 import { IUser } from './user.interface';
 import UserSchema from './user.model';
-import { DataStoredInToken, UserInfoInTokenDefault } from '../auth';
-// import SearchPaginationUserDto from './dtos/searchPaginationUser.dto';
-import { SearchPaginationRequestModel, SearchPaginationResponseModel } from '../../core/models';
 
 export default class UserService {
     public userSchema = UserSchema;
@@ -36,24 +32,16 @@ export default class UserService {
             throw new HttpException(HttpStatus.BAD_REQUEST, `The URL '${model.avatar_url}' is not valid`);
         }
 
-
-        // if (isRegister && newUser.role === UserRoleEnum.ADMIN) {
-        //     throw new HttpException(
-        //         HttpStatus.BAD_REQUEST,
-        //         `You can only register with the Student or Instructor role!`,
-        //     );
-        // }
-
         // check email duplicates
         const existingUserByEmail = await this.userSchema.findOne({
-            email: { $regex: new RegExp('^' + newUser.email + '$', 'i') },
+            email: { $regex: new RegExp('^' + newUser.email + '$', 'i') }, // reges allow find string with case insensitive
         });
         if (existingUserByEmail) {
             throw new HttpException(HttpStatus.BAD_REQUEST, `Your email: '${newUser.email}' already exists!`);
         }
 
-        // check user role instructor
-        if (newUser.role === UserRoleEnum.INSTRUCTOR) {
+        // check user !role is admin and required fields
+        if (newUser.role) {
             const requiredFields = [
                 {
                     field: model.description,
@@ -69,7 +57,7 @@ export default class UserService {
                 },
             ];
 
-            // check required fields for role instructor
+            // check required fields
             for (const item of requiredFields) {
                 if (!item.field) {
                     throw new HttpException(HttpStatus.BAD_REQUEST, `${item.title} should not be empty!`);
@@ -87,7 +75,7 @@ export default class UserService {
         if (!createdUser) {
             throw new HttpException(HttpStatus.ACCEPTED, `Create item failed!`);
         }
-        const resultUser: IUser = createdUser.toObject();
+        const resultUser: IUser = createdUser.toObject(); // convert to object
         delete resultUser.password;
         return resultUser;
     }
@@ -126,8 +114,8 @@ export default class UserService {
         const errorResults: IError[] = [];
 
         if (model.dob) {
-            const dobDate = new Date(model.dob);
-            if (isNaN(dobDate.getTime())) {
+            const dobDate = new Date(model.dob); // convert to date
+            if (isNaN(dobDate.getTime())) { // check if date is valid, dob is NaN ?
                 errorResults.push({
                     message: 'Please provide value with date type!',
                     field: 'dob',
@@ -150,13 +138,13 @@ export default class UserService {
             updated_at: new Date(),
         };
 
-        const updateUserId = await this.userSchema.updateOne({ _id: userId }, updateData);
+        const updateUserId = await this.userSchema.updateOne({ _id: userId }, updateData); 
 
-        if (!updateUserId.acknowledged) {
+        if (!updateUserId.acknowledged) { // check if update user info failed by using acknowledged to check if the update operation was successful
             throw new HttpException(HttpStatus.BAD_REQUEST, 'Update user info failed!');
         }
 
-        const updateUser = await this.getUserById(userId);
+        const updateUser = await this.getUserById(userId); // get user info after update
         return updateUser;
     }
 
@@ -220,7 +208,7 @@ export default class UserService {
 
         // check old_password
         if (model.old_password) {
-            const isMatchPassword = await bcryptjs.compare(model.old_password, user.password!);
+            const isMatchPassword = await bcryptjs.compare(model.old_password, user.password!); // compare old password with user password in database
             if (!isMatchPassword) {
                 throw new HttpException(HttpStatus.BAD_REQUEST, `Your old password is not valid!`);
             }
