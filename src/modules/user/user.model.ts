@@ -3,7 +3,6 @@ import { COLLECTION_NAME } from '../../core/constants';
 import { UserRoles } from './user.constant';
 import { UserRoleEnum } from './user.enum';
 import { IUser } from './user.interface';
-import { v4 as uuidv4 } from "uuid";
 
 const UserSchemaEntity: Schema<IUser> = new Schema({
     email: { type: String, unique: true, index: true, required: true },

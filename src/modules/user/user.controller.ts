@@ -1,6 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
 import { HttpStatus } from '../../core/enums';
 import { formatResponse } from '../../core/utils';
+import RegisterDto from './dtos/register.dto';
+import ChangePasswordDto from './dtos/changePassword.dto';
 import UpdateUserDto from './dtos/updateUser.dto';
 import { IUser } from './user.interface';
 import UserService from './user.service';
@@ -11,7 +13,7 @@ export default class UserController {
     // TODO: create user
     public createUser = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const model = req.body;
+            const model: RegisterDto = req.body;
             const user: IUser = await this.userService.createUser(model);
             res.status(HttpStatus.OK).json(formatResponse<IUser>(user));
         } catch (error) {
@@ -45,7 +47,7 @@ export default class UserController {
         try {
             const model = req.body;
             await this.userService.changeRole(model);
-            res.status(HttpStatus.OK).json(formatResponse<null>(null));
+            res.status(HttpStatus.OK).json(formatResponse<string>('Role changed successfully'));
         } catch (error) {
             next(error);
         }
@@ -66,9 +68,20 @@ export default class UserController {
     public deleteUser = async (req: Request, res: Response, next: NextFunction) => {
         try {
             await this.userService.deleteUser(req.params.id);
-            res.status(HttpStatus.OK).json(formatResponse<null>(null));
+            res.status(HttpStatus.OK).json(formatResponse<string>('User deleted successfully'));
         } catch (error) {
             next(error);
         }
     };
+
+    // TODO: change password
+    public changePassword = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const model: ChangePasswordDto = req.body;
+            await this.userService.changePassword(model);
+            res.status(HttpStatus.OK).json(formatResponse<string>('Password changed successfully'));
+        } catch (error) {
+            next(error);
+        }
+    }
 }

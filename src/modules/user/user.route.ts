@@ -8,6 +8,7 @@ import UpdateUserDto from './dtos/updateUser.dto';
 import UserController from './user.controller';
 import { UserRoleEnum } from './user.enum';
 import ChangeRoleDto from './dtos/changeRole.dto';
+import ChangePasswordDto from './dtos/changePassword.dto';
 
 export default class UserRoute implements IRoute {
     public path = API_PATH.USER;
@@ -23,6 +24,7 @@ export default class UserRoute implements IRoute {
         // POST domain:/api/users -> Create normal user
         this.router.post(
             `${this.path}/create`,
+            authMiddleWare([UserRoleEnum.ADMIN]),
             validationMiddleware(RegisterDto),
             this.userController.createUser,
         );
@@ -45,20 +47,24 @@ export default class UserRoute implements IRoute {
         this.router.put(
             `${this.path}/change-role`,
             authMiddleWare([UserRoleEnum.ADMIN]),
-            validationMiddleware(ChangeRoleDto),
             this.userController.changeRole,
         );
-
 
         // PUT domain:/api/users/:id -> Update user
         this.router.put(
             `${this.path}/:id`,
-            authMiddleWare(),
-            validationMiddleware(UpdateUserDto),
+            authMiddleWare([UserRoleEnum.ADMIN]),
             this.userController.updateUser,
         );
 
         // POST domain:/api/users/:id -> Delete user logic
         this.router.delete(`${this.path}/:id`, authMiddleWare([UserRoleEnum.ADMIN]), this.userController.deleteUser);
+
+        // PUT domain:/api/users/change-password -> Change user password
+        this.router.put(
+            `${this.path}/change-password`,
+            authMiddleWare([UserRoleEnum.ADMIN]),
+            this.userController.changePassword,
+        );
     }
 }

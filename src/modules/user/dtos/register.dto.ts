@@ -14,10 +14,10 @@ export default class RegisterDto {
         avatar_url: string = '',
         dob: Date = new Date(),
 
-        is_verified: boolean = false,
-        verification_token: string = '',
-        verification_token_expires: Date = new Date(),
-        token_version: number = 0,
+        // is_verified: boolean = false,
+        // verification_token: string = '',
+        // verification_token_expires: Date = new Date(),
+        // token_version: number = 0,
 
         created_at: Date = new Date(),
         updated_at: Date = new Date(),
@@ -30,10 +30,10 @@ export default class RegisterDto {
         this.phone_number = phone_number;
         this.avatar_url = avatar_url;
         this.dob = dob;
-        this.is_verified = is_verified;
-        this.verification_token = verification_token;
-        this.verification_token_expires = verification_token_expires;
-        this.token_version = token_version;
+        // this.is_verified = is_verified;
+        // this.verification_token = verification_token;
+        // this.verification_token_expires = verification_token_expires;
+        // this.token_version = token_version;
 
         this.created_at = created_at;
         this.updated_at = updated_at;
@@ -60,10 +60,10 @@ export default class RegisterDto {
     @IsDate()
     public dob: Date;
 
-    public is_verified: boolean;
-    public verification_token: string;
-    public verification_token_expires: Date;
-    public token_version: number;
+    // public is_verified: boolean;
+    // public verification_token: string;
+    // public verification_token_expires: Date;
+    // public token_version: number;
 
     @IsDate()
     public created_at: Date;

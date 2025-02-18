@@ -31,7 +31,7 @@ export default class AuthRoute implements IRoute {
         //     this.authController.verifiedToken,
         // );
 
-        // GET domain:/api/auth -> Require Login
+        // GET domain:/api/auth -> Get Current Login User -> Require Login
         this.router.get(this.path, authMiddleWare([], true), this.authController.getCurrentLoginUser);
 
         // GET domain:/api/auth/logout -> Logout user

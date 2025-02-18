@@ -2,18 +2,18 @@ import bcryptjs from 'bcryptjs';
 import { HttpStatus } from '../../core/enums';
 import { HttpException } from '../../core/exceptions';
 import { IError } from '../../core/interfaces';
-import { checkValidUrl, createTokenVerifiedUser, encodePasswordUserNormal, isEmptyObject } from '../../core/utils';
+import { checkValidUrl, encodePasswordUserNormal, isEmptyObject } from '../../core/utils';
+import RegisterDto from './dtos/register.dto';
 import ChangeRoleDto from './dtos/changeRole.dto';
 import SearchUserDto from './dtos/searchUser.dto';
 import UpdateUserDto from './dtos/updateUser.dto';
-import { UserReviewStatusEnum, UserRoleEnum } from './user.enum';
+import ChangePasswordDto from './dtos/changePassword.dto';
+import { UserRoleEnum } from './user.enum';
 import { IUser } from './user.interface';
 import UserSchema from './user.model';
 import { DataStoredInToken, UserInfoInTokenDefault } from '../auth';
 // import SearchPaginationUserDto from './dtos/searchPaginationUser.dto';
 import { SearchPaginationRequestModel, SearchPaginationResponseModel } from '../../core/models';
-import RegisterDto from './dtos/register.dto';
-import { v4 as uuidv4 } from "uuid";
 
 export default class UserService {
     public userSchema = UserSchema;
@@ -105,7 +105,7 @@ export default class UserService {
         userId: string,
         is_deletedPassword = true,
     ): Promise<IUser> {
-        const user = await this.userSchema.findOne({ _id: userId, is_verified: true }).lean();
+        const user = await this.userSchema.findOne({ _id: userId }).lean();
         if (!user) {
             throw new HttpException(HttpStatus.BAD_REQUEST, `Item is not exists.`);
         }
@@ -142,6 +142,7 @@ export default class UserService {
 
         const updateData = {
             name: model.name,
+            email: model.email,
             description: model.description || item.description,
             phone_number: model.phone_number || item.phone_number,
             avatar_url: model.avatar_url || item.avatar_url,
@@ -203,6 +204,44 @@ export default class UserService {
         if (!deleteUser.acknowledged) {
             throw new HttpException(HttpStatus.BAD_REQUEST, 'Delete item failed!');
         }
+
+        return true;
+    }
+
+    public async changePassword(model: ChangePasswordDto): Promise<boolean> {
+        if (isEmptyObject(model)) {
+            throw new HttpException(HttpStatus.BAD_REQUEST, 'Model data is empty');
+        }
+
+        const userId = model.user_id;
+
+        // check user exits
+        const user = await this.getUserById(userId, false);
+
+        // check old_password
+        if (model.old_password) {
+            const isMatchPassword = await bcryptjs.compare(model.old_password, user.password!);
+            if (!isMatchPassword) {
+                throw new HttpException(HttpStatus.BAD_REQUEST, `Your old password is not valid!`);
+            }
+        }
+
+        // compare new_password vs old_password
+        if (model.new_password === model.old_password) {
+            throw new HttpException(HttpStatus.BAD_REQUEST, `New password and old password must not be the same!`);
+        }
+
+        // handle encode password
+        const newPassword = await encodePasswordUserNormal(model.new_password);
+        const updatePasswordUser = await this.userSchema
+            .findByIdAndUpdate(userId, {
+                ...user,
+                password: newPassword,
+                updated_at: new Date(),
+            })
+            .lean();
+
+        if (!updatePasswordUser) throw new HttpException(HttpStatus.BAD_REQUEST, 'Change password failed!');
 
         return true;
     }

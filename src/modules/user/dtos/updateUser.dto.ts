@@ -1,4 +1,4 @@
-import { IsDate, IsNotEmpty, IsString } from 'class-validator';
+import { IsDate, IsEmail, IsNotEmpty, IsString } from 'class-validator';
 
 export default class UpdateUserDto {
     constructor(
@@ -7,12 +7,14 @@ export default class UpdateUserDto {
         phone_number: string,
         avatar_url: string,
         dob: Date | string,
+        email: string,
     ) {
         this.name = name;
         this.description = description;
         this.phone_number = phone_number;
         this.avatar_url = avatar_url;
         this.dob = dob;
+        this.email = email;
     }
 
     @IsNotEmpty()
@@ -30,4 +32,6 @@ export default class UpdateUserDto {
     @IsDate()
     public dob: Date | string;
 
+    @IsEmail()
+    public email: string;
 }

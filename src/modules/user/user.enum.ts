@@ -4,8 +4,3 @@ export enum UserRoleEnum {
     INSTRUCTOR = 'instructor',
     STUDENT = 'student',
 }
-
-export enum UserReviewStatusEnum {
-    APPROVE = 'approve',
-    REJECT = 'reject',
-}

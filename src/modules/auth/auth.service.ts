@@ -63,34 +63,6 @@ export default class AuthService {
         return user;
     }
 
-    // public async verifiedTokenUser(verifiedToken: string): Promise<boolean> {
-    //     const user = await this.userSchema.findOne({
-    //         verification_token: verifiedToken,
-    //     });
-
-    //     if (!user) {
-    //         throw new HttpException(HttpStatus.BAD_REQUEST, `Token is not valid.`);
-    //     }
-    //     const tokenExpires = moment(
-    //         user?.token_expires?.toString(),
-    //         'ddd MMM DD YYYY HH:mm:ss [GMT]ZZ',
-    //     ).toDate();
-    //     if (moment(new Date()).isAfter(moment(tokenExpires))) {
-    //         throw new HttpException(HttpStatus.BAD_REQUEST, `Token is expired!`);
-    //     }
-
-    //     user.token = undefined;
-    //     user.token_expires = undefined;
-    //     user.updated_at = new Date();
-
-    //     const updateUserId = await user.save();
-    //     if (!updateUserId) {
-    //         throw new HttpException(HttpStatus.BAD_REQUEST, 'Cannot update user!');
-    //     }
-
-    //     return true;
-    // }
-
     public async getCurrentLoginUser(userId: string): Promise<IUser> {
         const user = await this.userSchema.findById(userId).lean();
         if (!user) {
