@@ -1,3 +1,4 @@
+import { validate } from 'class-validator';
 import bcryptjs from 'bcryptjs';
 import { HttpStatus } from '../../core/enums';
 import { HttpException } from '../../core/exceptions';
@@ -10,6 +11,7 @@ import ChangePasswordDto from './dtos/changePassword.dto';
 import { UserRoleEnum } from './user.enum';
 import { IUser } from './user.interface';
 import UserSchema from './user.model';
+import { isValidObjectId } from '../../core/utils';
 
 export default class UserService {
     public userSchema = UserSchema;
@@ -201,7 +203,12 @@ export default class UserService {
             throw new HttpException(HttpStatus.BAD_REQUEST, 'Model data is empty');
         }
 
-        const userId = model.user_id;
+        const userId = model.user_id
+
+        // Validate userId as a valid ObjectId
+        if (!isValidObjectId(userId)) {
+            throw new HttpException(HttpStatus.BAD_REQUEST, 'Invalid user ID format');
+        }
 
         // check user exits
         const user = await this.getUserById(userId, false);

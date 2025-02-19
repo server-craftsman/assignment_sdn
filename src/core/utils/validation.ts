@@ -1,6 +1,12 @@
+import mongoose from "mongoose";
+
 export const checkValidUrl = (url: string) => {
     const urlPattern = /^(http:\/\/|https:\/\/)/i;
     return urlPattern.test(url);
+};
+
+export const isValidObjectId = (id: string) => {
+    return mongoose.Types.ObjectId.isValid(id);
 };
 
 // export const checkValidUrl = (url: string | undefined): boolean => {

@@ -15,7 +15,7 @@ export default class UserController {
         try {
             const model: RegisterDto = req.body;
             const user: IUser = await this.userService.createUser(model);
-            res.status(HttpStatus.OK).json(formatResponse<IUser>(user));
+            res.status(HttpStatus.CREATED).json(formatResponse<IUser>(user));
         } catch (error) {
             next(error);
         }

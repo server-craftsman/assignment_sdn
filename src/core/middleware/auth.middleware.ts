@@ -4,7 +4,6 @@ import { DataStoredInToken } from '../../modules/auth';
 import { UserRole, UserSchema } from '../../modules/user';
 import { HttpStatus } from '../enums';
 import { logger } from '../utils';
-import { v4 as uuidv4 } from "uuid";
 
 const authMiddleWare = (roles?: UserRole[], isClient = false): RequestHandler => {
     return async (req: Request, res: Response, next: NextFunction): Promise<void> => {

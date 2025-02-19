@@ -1,6 +1,6 @@
 import { formatResponse, isEmptyObject } from './helper';
 import logger from './logger';
-import { checkValidUrl } from './validation';
+import { checkValidUrl, isValidObjectId } from './validation';
 import { createToken, createTokenVerifiedUser } from './token';
 import { encodePasswordUserNormal } from './password';
 export { 
@@ -10,5 +10,6 @@ export {
     checkValidUrl, 
     createToken, 
     createTokenVerifiedUser,
-    encodePasswordUserNormal
+    encodePasswordUserNormal,
+    isValidObjectId
 };
