@@ -6,7 +6,7 @@ import ChangePasswordDto from './dtos/changePassword.dto';
 import UpdateUserDto from './dtos/updateUser.dto';
 import { IUser } from './user.interface';
 import UserService from './user.service';
-
+import { UserRoleEnum } from './user.enum';
 export default class UserController {
     private userService = new UserService();
 
@@ -15,7 +15,7 @@ export default class UserController {
         try {
             const model: RegisterDto = req.body;
             const user: IUser = await this.userService.createUser(model);
-            res.status(HttpStatus.OK).json(formatResponse<IUser>(user));
+            res.status(HttpStatus.CREATED).json(formatResponse<IUser>(user));
         } catch (error) {
             next(error);
         }
@@ -74,12 +74,17 @@ export default class UserController {
         }
     };
 
-    // TODO: change password
+    // TODO: change password user
     public changePassword = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const model: ChangePasswordDto = req.body;
-            await this.userService.changePassword(model);
-            res.status(HttpStatus.OK).json(formatResponse<null>(null));
+            // const userId = req.user.id;
+            
+            await this.userService.changePassword({
+                ...model,
+               user_id: req.user.id
+            });
+            res.status(HttpStatus.OK).json(formatResponse<string>('Password changed successfully'));
         } catch (error) {
             next(error);
         }

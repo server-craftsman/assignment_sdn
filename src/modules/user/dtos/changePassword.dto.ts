@@ -9,7 +9,7 @@ export default class ChangePasswordDto {
 
     @IsNotEmpty()
     public user_id: string;
-
+    
     @IsNotEmpty()
     @MinLength(6)
     public old_password: string;

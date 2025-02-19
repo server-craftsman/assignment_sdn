@@ -103,6 +103,44 @@ export default class UserService {
         return user;
     }
 
+    public async changePassword(model: ChangePasswordDto): Promise<boolean> {
+        if (isEmptyObject(model)) {
+            throw new HttpException(HttpStatus.BAD_REQUEST, 'Model data is empty');
+        }
+
+        const userId = model.user_id;
+    // check user exits
+    const user = await this.getUserById(userId, false);
+    if (!user.password) {
+        throw new HttpException(HttpStatus.BAD_REQUEST, `User created by google cannot change password.`);
+    }
+    // check old_password
+    if (model.old_password) {
+        const isMatchPassword = await bcryptjs.compare(model.old_password, user.password!);
+        if (!isMatchPassword) {
+            throw new HttpException(HttpStatus.BAD_REQUEST, `Your old password is not valid!`);
+        }
+    }
+    // compare new_password vs old_password
+    if (model.new_password === model.old_password) {
+        throw new HttpException(HttpStatus.BAD_REQUEST, `New password and old password must not be the same!`);
+    }
+    // handle encode password
+    const newPassword = await encodePasswordUserNormal(model.new_password);
+    const updateResult = await this.userSchema.updateOne(
+        { _id: userId },
+        {
+            $set: {
+                password: newPassword,
+                updated_at: new Date(),
+            }
+        }
+    );
+    if (!updateResult.acknowledged) {
+        throw new HttpException(HttpStatus.BAD_REQUEST, 'Change password failed!');
+    }
+    return true;
+}
     public async updateUser(userId: string, model: UpdateUserDto): Promise<IUser> {
         if (isEmptyObject(model)) {
             throw new HttpException(HttpStatus.BAD_REQUEST, 'Model data is empty');
@@ -192,44 +230,6 @@ export default class UserService {
         if (!deleteUser.acknowledged) {
             throw new HttpException(HttpStatus.BAD_REQUEST, 'Delete item failed!');
         }
-
-        return true;
-    }
-
-    public async changePassword(model: ChangePasswordDto): Promise<boolean> {
-        if (isEmptyObject(model)) {
-            throw new HttpException(HttpStatus.BAD_REQUEST, 'Model data is empty');
-        }
-
-        const userId = model.user_id;
-
-        // check user exits
-        const user = await this.getUserById(userId, false);
-
-        // check old_password
-        if (model.old_password) {
-            const isMatchPassword = await bcryptjs.compare(model.old_password, user.password!); // compare old password with user password in database
-            if (!isMatchPassword) {
-                throw new HttpException(HttpStatus.BAD_REQUEST, `Your old password is not valid!`);
-            }
-        }
-
-        // compare new_password vs old_password
-        if (model.new_password === model.old_password) {
-            throw new HttpException(HttpStatus.BAD_REQUEST, `New password and old password must not be the same!`);
-        }
-
-        // handle encode password
-        const newPassword = await encodePasswordUserNormal(model.new_password);
-        const updatePasswordUser = await this.userSchema
-            .findByIdAndUpdate(userId, {
-                ...user,
-                password: newPassword,
-                updated_at: new Date(),
-            })
-            .lean();
-
-        if (!updatePasswordUser) throw new HttpException(HttpStatus.BAD_REQUEST, 'Change password failed!');
 
         return true;
     }

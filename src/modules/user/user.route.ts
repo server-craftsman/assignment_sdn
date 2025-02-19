@@ -1,9 +1,11 @@
 import { Router } from 'express';
 import { API_PATH } from '../../core/constants';
 import { IRoute } from '../../core/interfaces';
-import { authMiddleWare } from '../../core/middleware';
+import { authMiddleWare, validationMiddleware } from '../../core/middleware';
 import UserController from './user.controller';
 import { UserRoleEnum } from './user.enum';
+import ChangePasswordDto from './dtos/changePassword.dto';
+import ChangeRoleDto from './dtos/changeRole.dto';
 
 export default class UserRoute implements IRoute {
     public path = API_PATH.USER;
@@ -18,7 +20,7 @@ export default class UserRoute implements IRoute {
 
         // POST domain:/api/users -> Create normal user
         this.router.post(
-            `${this.path}/create`,
+            API_PATH.CREATE_USER,
             authMiddleWare([UserRoleEnum.ADMIN]),
             this.userController.createUser,
         );
@@ -31,26 +33,30 @@ export default class UserRoute implements IRoute {
 
             // PUT domain:/api/users/change-role -> Change user role
         this.router.put(
-            `${this.path}/change-role`,
+            API_PATH.CHANGE_ROLE,
             authMiddleWare([UserRoleEnum.ADMIN]),
+            validationMiddleware(ChangeRoleDto),
             this.userController.changeRole,
         );
 
-        // PUT domain:/api/users/:id -> Update user
+        // PUT domain:/api/users/:id -> Update user info
         this.router.put(
             `${this.path}/:id`,
             authMiddleWare([UserRoleEnum.ADMIN]),
             this.userController.updateUser,
         );
 
+        // PUT domain:/api/users/change-password -> Change user password
+        this.router.put(
+            API_PATH.CHANGE_PASSWORD,
+            authMiddleWare(),
+            validationMiddleware(ChangePasswordDto),
+            this.userController.changePassword,
+        );
+
         // POST domain:/api/users/:id -> Delete user logic
         this.router.delete(`${this.path}/:id`, authMiddleWare([UserRoleEnum.ADMIN]), this.userController.deleteUser);
 
-        // PUT domain:/api/users/change-password -> Change user password
-        this.router.put(
-            `${this.path}/change-password`,
-            authMiddleWare([UserRoleEnum.ADMIN]),
-            this.userController.changePassword,
-        );
+        
     }
 }

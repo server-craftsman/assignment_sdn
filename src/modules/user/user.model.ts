@@ -5,6 +5,7 @@ import { UserRoleEnum } from './user.enum';
 import { IUser } from './user.interface';
 
 const UserSchemaEntity: Schema<IUser> = new Schema({
+    // _id: { type: String },
     email: { type: String, unique: true, index: true, required: true },
     password: { type: String },
     name: { type: String, required: true },

@@ -1,7 +1,7 @@
 import { Document } from 'mongoose';
 import { UserRoleEnum } from './user.enum';
 
-export type UserRole = UserRoleEnum.ADMIN | UserRoleEnum.INSTRUCTOR | UserRoleEnum.STUDENT | UserRoleEnum.ALL;
+export type UserRole = '' | UserRoleEnum.ADMIN | UserRoleEnum.INSTRUCTOR | UserRoleEnum.STUDENT;
 
 export interface IUser extends Document {
     _id: string;

@@ -1,61 +1,42 @@
 import winston from "winston";
 import path from "path";
+import fs from 'fs';
 
-// Custom log format with color and timestamp
-const logFormat = winston.format.combine(
+// Ensure logs directory exists
+const logDir = path.join(process.cwd(), 'logs');
+if (!fs.existsSync(logDir)) {
+    fs.mkdirSync(logDir);
+}
+
+// Simple but nice console format
+const consoleFormat = winston.format.combine(
+    winston.format.timestamp({ format: 'HH:mm:ss' }),
     winston.format.colorize({ all: true }),
-    winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-    winston.format.printf(({ timestamp, level, message, stack }) => {
-        const coloredLevel = level.toUpperCase();
-        const formattedMessage = stack 
-            ? `[${timestamp}] ${coloredLevel}: ${message}\nStack Trace: ${stack}`
-            : `[${timestamp}] ${coloredLevel}: ${message}`;
-        return formattedMessage;
+    winston.format.printf(({ timestamp, level, message }) => {
+        const icon = level.includes('error') ? '❌' : 
+                     level.includes('warn') ? '⚠️' : 
+                     level.includes('info') ? 'ℹ️' : '🔍';
+        return `${icon} ${timestamp} [${level}]: ${message}`;
     })
 );
 
-// Create log directory if it doesn't exist
-const logDir = path.join(process.cwd(), 'logs');
-
 const logger = winston.createLogger({
     level: 'info',
-    format: logFormat,
     transports: [
-        // Console transport with full color and formatting
+        // Console logs
         new winston.transports.Console({
-            format: logFormat
+            format: consoleFormat
         }),
         
-        // Error log file - only captures error and above
+        // Error logs
         new winston.transports.File({
             filename: path.join(logDir, 'error.log'),
-            level: 'error',
-            format: winston.format.combine(
-                winston.format.errors({ stack: true }),
-                winston.format.json()
-            )
+            level: 'error'
         }),
         
-        // Combined log file - captures all logs
+        // All logs
         new winston.transports.File({
-            filename: path.join(logDir, 'combined.log'),
-            format: winston.format.combine(
-                winston.format.json()
-            )
-        })
-    ],
-    
-    // Unhandled exception handling
-    exceptionHandlers: [
-        new winston.transports.File({ 
-            filename: path.join(logDir, 'exceptions.log') 
-        })
-    ],
-    
-    // Rejection handling
-    rejectionHandlers: [
-        new winston.transports.File({ 
-            filename: path.join(logDir, 'rejections.log') 
+            filename: path.join(logDir, 'combined.log')
         })
     ]
 });
