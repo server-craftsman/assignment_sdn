@@ -23,10 +23,11 @@ export default class UserController {
                 '0869872830',
                 'https://i.pinimg.com/originals/0d/35/fc/0d35fc27612422347e8f48f52053b79d.jpg',
                 new Date('2003-01-01'),
+                '',
                 new Date(),
                 new Date(),
             );
-            const user: IUser = await this.userService.createUser(model);
+            const user: IUser = await this.userService.createUser('', model);
             res.status(HttpStatus.CREATED).json(formatResponse<IUser>(user));
         } catch (error) {
             next(error);
@@ -37,7 +38,7 @@ export default class UserController {
     public createUser = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const model: RegisterDto = req.body;
-            const user: IUser = await this.userService.createUser(model);
+            const user: IUser = await this.userService.createUser(req.user.id, model);
             res.status(HttpStatus.CREATED).json(formatResponse<IUser>(user));
         } catch (error) {
             next(error);

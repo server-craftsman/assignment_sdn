@@ -15,6 +15,7 @@ const UserSchemaEntity: Schema<IUser> = new Schema({
         default: UserRoleEnum.STUDENT,
         required: true,
     },
+    user_id: { type: String },
     description: { type: String },
     phone_number: { type: String },
     avatar_url: { type: String },

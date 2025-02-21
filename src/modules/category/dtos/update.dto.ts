@@ -10,6 +10,9 @@ export class UpdateCategoryDto {
   @IsString()
   description?: string;
 
+  @IsOptional()
+  @IsString()
+  user_id?: string;
 
   
   constructor(
@@ -17,5 +20,6 @@ export class UpdateCategoryDto {
   ) {
     this.name = data.name;
     this.description = data.description;
+    this.user_id = data.user_id;
   }
 }

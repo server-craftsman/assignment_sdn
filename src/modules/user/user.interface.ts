@@ -16,7 +16,7 @@ export interface IUser extends Document {
     access_token?: string;
     refresh_token?: string;
     token_version: number; // default 0
-
+    user_id?: string; // default empty
     created_at?: Date; // default new Date()
     updated_at?: Date; // default new Date()
 }

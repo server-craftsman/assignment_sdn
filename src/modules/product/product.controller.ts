@@ -12,7 +12,7 @@ export default class ProductController {
     public create = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const model: CreateProductDto = new CreateProductDto(req.body)
-            const newProduct: IProduct = await this.productService.create(model)
+            const newProduct: IProduct = await this.productService.create(req.user.id, model)
             res.status(HttpStatus.CREATED).json(formatResponse(newProduct))
         } catch (error) {
             next(error)
@@ -39,7 +39,7 @@ export default class ProductController {
     public update = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const model: UpdateProductDto = new UpdateProductDto(req.body)
-            const product: IProduct = await this.productService.update(req.params.id, model)
+            const product: IProduct = await this.productService.update(req.params.id, req.user.id, model)
             res.status(HttpStatus.OK).json(formatResponse(product))
         } catch (error) {
             next(error)
@@ -48,8 +48,8 @@ export default class ProductController {
 
     public delete = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            await this.productService.delete(req.params.id)
-            res.status(HttpStatus.OK).json(formatResponse<null>(null))
+            await this.productService.delete(req.params.id, req.user.id)
+            res.status(HttpStatus.OK).json(formatResponse<string>('Delete product successfully'))
         } catch (error) {
             next(error)
         }

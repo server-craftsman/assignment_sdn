@@ -28,3 +28,11 @@ export const createTokenVerifiedUser = () => {
         verification_token_expires: new Date(Date.now() + 1000 * 60 * 60 * 24), // 24 hours
     };
 };
+
+
+export const decodeToken = (token: string): string => {
+    const secret: string = process.env.JWT_TOKEN_SECRET!;
+    const decodedToken = jwt.verify(token, secret) as DataStoredInToken;
+    return decodedToken.id;
+};
+

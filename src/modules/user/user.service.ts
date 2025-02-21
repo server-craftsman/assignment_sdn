@@ -14,7 +14,7 @@ import UserSchema from './user.model';
 export default class UserService {
     public userSchema = UserSchema;
 
-    public async createUser(model: RegisterDto): Promise<IUser> {
+    public async createUser(user_id: string, model: RegisterDto): Promise<IUser> {
         if (isEmptyObject(model)) {
             throw new HttpException(HttpStatus.BAD_REQUEST, 'Model data is empty');
         }
@@ -26,6 +26,7 @@ export default class UserService {
             phone_number: model.phone_number || '',
             avatar_url: model.avatar_url || '',
             token_version: 0,
+            user_id: user_id,
         };
 
         if (newUser.avatar_url && !checkValidUrl(model.avatar_url)) {
@@ -69,6 +70,14 @@ export default class UserService {
         if (model.password) {
             // handle encode password
             newUser.password = await encodePasswordUserNormal(model.password);
+        }
+
+        if(model.user_id) {
+            const user = await this.userSchema.findOne({ _id: model.user_id });
+            if (!user) {
+                throw new HttpException(HttpStatus.BAD_REQUEST, `User is not exists.`);
+            }
+            newUser.user_id = user._id;
         }
 
         const createdUser: IUser = await this.userSchema.create(newUser);

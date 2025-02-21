@@ -23,6 +23,10 @@ export class CreateProductDto {
     image_url?: string | undefined;
 
     @IsOptional()
+    @IsString()
+    user_id?: string;
+
+    @IsOptional()
     @IsDate()
     createdAt?: Date;
     updatedAt?: Date;
@@ -34,6 +38,7 @@ export class CreateProductDto {
         this.price = data.price || 0;
         this.discount = data.discount || 0;
         this.image_url = data.image_url || 'https://via.placeholder.com/150';
+        this.user_id = data.user_id || '';
         this.createdAt = data.createdAt || new Date();
         this.updatedAt = data.updatedAt || new Date();
     }

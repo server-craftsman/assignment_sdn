@@ -2,6 +2,7 @@ import mongoose, {Model} from "mongoose";
 import { IProduct } from "./product.interface";
 import { ICategory } from "../category";
 import { Product } from "./product.model";
+import { User } from "../user";
 import { Category } from "../category/category.model";
 import { IError } from "../../core/interfaces";
 import {CreateProductDto} from "./dtos/create.dto";
@@ -9,15 +10,22 @@ import {UpdateProductDto} from "./dtos/update.dto";
 import { isEmptyObject, checkValidUrl } from "../../core/utils";
 import { HttpStatus } from "../../core/enums";
 import { HttpException } from "../../core/exceptions";
+import { IUser } from "../user/user.interface";
 
 export class ProductService {
     public productSchema: Model<IProduct> = Product;
     public categorySchema: Model<ICategory> = Category;
+    public userSchema: Model<IUser> = User;
 
-    public create = async (model: CreateProductDto): Promise<IProduct> => {
+    public create = async (user_id: string, model: CreateProductDto): Promise<IProduct> => {
         try {
             if (isEmptyObject(model)) {
                 throw new HttpException(HttpStatus.BAD_REQUEST, "No data provided");
+            }
+
+            const user = await this.userSchema.findOne({ _id: user_id });
+            if (!user) {
+                throw new HttpException(HttpStatus.BAD_REQUEST, "User not found");
             }
     
             const errorResults: IError[] = [];
@@ -59,7 +67,7 @@ export class ProductService {
             }
     
             // Attempt to create the product
-            const product = await this.productSchema.create(model);
+            const product = await this.productSchema.create({...model, user_id: user_id});
             return product;
         } catch (error: any) {
             throw new HttpException(HttpStatus.SERVER_ERROR, `Failed to create product: ${error.message}`, error.errors);
@@ -88,10 +96,15 @@ export class ProductService {
         }
     };
 
-    public update = async (id: string, model: UpdateProductDto): Promise<IProduct> => {
+    public update = async (id: string, user_id: string, model: UpdateProductDto): Promise<IProduct> => {
         try {
             if (isEmptyObject(model)) {
                 throw new Error("No data provided");
+            }
+
+            const user = await this.userSchema.findOne({ _id: user_id });
+            if (!user) {
+                throw new HttpException(HttpStatus.BAD_REQUEST, "User not found");
             }
 
             const errorResults: IError[] = [];
@@ -130,10 +143,11 @@ export class ProductService {
 
             const updateData = {
                 ...model,
+                user_id: user_id,
                 updated_at: new Date()
             };
 
-            const updatedProduct = await this.productSchema.updateOne({ _id: id }, updateData);
+            const updatedProduct = await this.productSchema.updateOne({ _id: id, user_id: user_id }, updateData);
 
             if(!updatedProduct) {
                 throw new Error("Product not found or could not be updated");
@@ -149,10 +163,15 @@ export class ProductService {
         }
     };
 
-    public delete = async (id: string): Promise<boolean> => {
+    public delete = async (id: string, user_id: string): Promise<boolean> => {
         try {
             if(isEmptyObject(id)) {
                 throw new Error("No data provided");
+            }
+
+            const user = await this.userSchema.findOne({ _id: user_id });
+            if (!user) {
+                throw new HttpException(HttpStatus.BAD_REQUEST, "User not found");
             }
 
             const errorResults: IError[] = [];
@@ -166,7 +185,7 @@ export class ProductService {
                 throw new HttpException(HttpStatus.BAD_REQUEST, "Validation errors", errorResults);
             }
 
-            const deletedProduct = await this.productSchema.deleteOne({ _id: id });
+            const deletedProduct = await this.productSchema.deleteOne({ _id: id, user_id: user_id });
             if (!deletedProduct.acknowledged) {
                 throw new Error("Product not found or could not be deleted");
             }
@@ -176,6 +195,5 @@ export class ProductService {
             throw new Error(`Failed to delete product: ${error.message}`);
         }
     };
-
 
 };

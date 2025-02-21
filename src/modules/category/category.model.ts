@@ -18,6 +18,11 @@ const CategorySchema = new mongoose.Schema<ICategory>({
     type: [mongoose.Schema.Types.ObjectId],
     ref: COLLECTION_NAME.PRODUCT,
     default: []
+  },
+  user_id: {
+    type: String,
+    ref: COLLECTION_NAME.USER,
+    default: null
   }
 }, {
   timestamps: true

@@ -12,7 +12,7 @@ export default class CategoryController {
     public create = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const model: CreateCategoryDto = new CreateCategoryDto(req.body);
-            const category: ICategory = await this.categoryService.create(model);
+            const category: ICategory = await this.categoryService.create(req.user.id, model);
             res.status(HttpStatus.CREATED).json(formatResponse(category));
         } catch (error) {
             next(error);
@@ -42,7 +42,7 @@ export default class CategoryController {
         try {
             const { id } = req.params;
             const updateCategoryDto = new UpdateCategoryDto(req.body);
-            const updatedCategory = await this.categoryService.update(id, updateCategoryDto);
+            const updatedCategory = await this.categoryService.update(id, req.user.id, updateCategoryDto);
             res.status(HttpStatus.OK).json(formatResponse(updatedCategory));
         } catch (error) {
             next(error);
@@ -52,8 +52,18 @@ export default class CategoryController {
     public delete = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const { id } = req.params;
-            await this.categoryService.delete(id);
-            res.status(HttpStatus.OK).json(formatResponse<null>(null));
+            await this.categoryService.delete(id, req.user.id);
+            res.status(HttpStatus.OK).json(formatResponse<string>('Delete category successfully'));
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    public getProductsByCategoryId = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const { id } = req.params;
+            const products = await this.categoryService.searchCategoryWithProducts(id);
+            res.status(HttpStatus.OK).json(formatResponse(products));
         } catch (error) {
             next(error);
         }

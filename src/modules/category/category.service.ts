@@ -4,18 +4,26 @@ import { CreateCategoryDto } from './dtos/create.dto';
 import { UpdateCategoryDto } from './dtos/update.dto';
 import { HttpStatus } from '../../core/enums';
 import { HttpException } from '../../core/exceptions';
-import { isEmptyObject, checkValidUrl } from '../../core/utils';
+import { isEmptyObject } from '../../core/utils';
 import { IError } from '../../core/interfaces';
 import { Product } from '../product/product.model';
+import { User } from '../user';
 
 export default class CategoryService {
   public categorySchema = Category;
   public productSchema = Product;
+  public userSchema = User;
 
-  public create = async (createCategoryDto: CreateCategoryDto): Promise<ICategory> => {
+  public create = async (user_id: string, createCategoryDto: CreateCategoryDto): Promise<ICategory> => {
     try {
       if (isEmptyObject(createCategoryDto)) {
         throw new HttpException(HttpStatus.BAD_REQUEST, 'Category name is required');
+      }
+
+      const user = await this.userSchema.findOne({ _id: user_id });
+      
+      if (!user) {
+        throw new HttpException(HttpStatus.BAD_REQUEST, 'User not found');
       }
 
       const errorResults: IError[] = [];
@@ -40,7 +48,10 @@ export default class CategoryService {
         throw new HttpException(HttpStatus.BAD_REQUEST, 'Validation failed', errorResults);
       }
 
-      const category = await this.categorySchema.create(createCategoryDto);
+      const category = await this.categorySchema.create({
+        ...createCategoryDto,
+        user_id: user_id
+      });
       if(!category) {
         throw new HttpException(HttpStatus.ACCEPTED, 'Category not created');
       }
@@ -71,10 +82,15 @@ export default class CategoryService {
     }
   }
 
-  public update = async (id: string, model: UpdateCategoryDto): Promise<ICategory> => {
+  public update = async (id: string, user_id: string, model: UpdateCategoryDto): Promise<ICategory> => {
     try {
       if (isEmptyObject(model)) {
         throw new HttpException(HttpStatus.BAD_REQUEST, 'Category name is required');
+      }
+
+      const user = await this.userSchema.findOne({ _id: user_id });
+      if (!user) {
+        throw new HttpException(HttpStatus.BAD_REQUEST, 'User not found');
       }
 
       const errorResults: IError[] = [];
@@ -105,7 +121,7 @@ export default class CategoryService {
         description: model.description
       };
 
-      const category = await this.categorySchema.updateOne({ _id: id }, updateData);
+      const category = await this.categorySchema.updateOne({ _id: id, user_id: user_id }, updateData);
       if (!category) {
         throw new HttpException(HttpStatus.NOT_FOUND, 'Category not found');
       }
@@ -120,7 +136,7 @@ export default class CategoryService {
     }
   }
 
-  public delete = async (id: string): Promise<boolean> => {
+  public delete = async (id: string, user_id: string): Promise<boolean> => {
     try {
       const item = await this.getItemById(id);
 
@@ -128,7 +144,12 @@ export default class CategoryService {
         throw new HttpException(HttpStatus.NOT_FOUND, 'Category not found');
       }
 
-      const deleteResult = await this.categorySchema.deleteOne({ _id: id } );
+      const user = await this.userSchema.findOne({ _id: user_id });
+      if (!user) {
+        throw new HttpException(HttpStatus.BAD_REQUEST, 'User not found');
+      }
+
+      const deleteResult = await this.categorySchema.deleteOne({ _id: id, user_id: user_id } );
 
       if (!deleteResult.acknowledged) {
         throw new HttpException(HttpStatus.NOT_FOUND, 'Category not found');
@@ -148,7 +169,7 @@ export default class CategoryService {
       }
       const products = await this.productSchema.find({ category_id: id });
       category.products = products;
-      await this.getItemById
+      await this.productSchema.populate(category, 'products'); 
       return category;
     } catch (error: any) {
       throw new HttpException(HttpStatus.SERVER_ERROR, `Failed to get products by category id: ${error.message}`, error.errors);

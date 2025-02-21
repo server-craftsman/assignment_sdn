@@ -9,12 +9,21 @@ export class CreateCategoryDto {
   @IsString()
   description?: string;
 
+  @IsOptional()
+  @IsString()
+  user_id?: string;
+
   // Partial is a type in TypeScript that allows you missing properties optionally
-  constructor(data: Partial<CreateCategoryDto> = {}) {
+  constructor(data: Partial<CreateCategoryDto> = {
+    name: '',
+    description: '',
+    user_id: '',
+  }) {
     // if (!data.name) {
     //   throw new Error('Category name is required');
     // }
     this.name = data.name || '';
     this.description = data.description;
+    this.user_id = data.user_id;
   }
 }

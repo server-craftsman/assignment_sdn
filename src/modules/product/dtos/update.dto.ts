@@ -14,6 +14,10 @@ export class UpdateProductDto {
     @IsString()
     description?: string;
 
+    @IsOptional()
+    @IsString()
+    user_id?: string;
+
     constructor(data: Partial<UpdateProductDto> = {}) { 
         this.name = data.name || '';
         this.description = data.description;
@@ -21,5 +25,6 @@ export class UpdateProductDto {
         this.price = data.price || 0;
         this.discount = data.discount || 0;
         this.image_url = data.image_url || 'https://via.placeholder.com/150';
+        this.user_id = data.user_id || '';
     }
 }

@@ -7,6 +7,7 @@ export interface IProduct extends Document {
     price: number | null; //required
     discount?: number; //optional
     image_url?: string | undefined; //optional
+    user_id?: string; //optional
     createdAt?: Date;
     updatedAt?: Date;
 }

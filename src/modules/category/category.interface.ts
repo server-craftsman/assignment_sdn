@@ -8,4 +8,5 @@ export interface ICategory extends Document {
   updatedAt?: Date;
   count: number;
   products: IProduct[];
+  user_id?: string;
 }

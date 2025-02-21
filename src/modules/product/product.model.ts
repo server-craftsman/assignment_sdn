@@ -9,6 +9,7 @@ const ProductSchema = new Schema<IProduct>({
     price: { type: Number, required: true },
     discount: { type: Number, default: 0 },
     image_url: { type: String, default: 'https://via.placeholder.com/150' },
+    user_id: { type: String, ref: COLLECTION_NAME.USER, default: null },
 }, { timestamps: true });
 
 //debug
