@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { HttpStatus } from '../../core/enums';
+import { HttpException } from '../../core/exceptions';
 import { formatResponse } from '../../core/utils';
 import RegisterDto from './dtos/register.dto';
 import ChangePasswordDto from './dtos/changePassword.dto';
@@ -9,6 +10,28 @@ import UserService from './user.service';
 import { UserRoleEnum } from './user.enum';
 export default class UserController {
     private userService = new UserService();
+
+    // TODO: generate user admin
+    public generateUser = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const model = new RegisterDto(
+                'Nguyen Dan Huy',
+                'admin@gmail.com',
+                '12345',
+                UserRoleEnum.ADMIN,
+                'Huy is a good boy',
+                '0869872830',
+                'https://i.pinimg.com/originals/0d/35/fc/0d35fc27612422347e8f48f52053b79d.jpg',
+                new Date('2003-01-01'),
+                new Date(),
+                new Date(),
+            );
+            const user: IUser = await this.userService.createUser(model);
+            res.status(HttpStatus.CREATED).json(formatResponse<IUser>(user));
+        } catch (error) {
+            next(error);
+        }
+    };
 
     // TODO: create user
     public createUser = async (req: Request, res: Response, next: NextFunction) => {
@@ -77,14 +100,10 @@ export default class UserController {
     // TODO: change password user
     public changePassword = async (req: Request, res: Response, next: NextFunction) => {
         try {
+            const userId = req.params.id;
             const model: ChangePasswordDto = req.body;
-            // const userId = req.user.id;
-            
-            await this.userService.changePassword({
-                ...model,
-               user_id: req.user.id
-            });
-            res.status(HttpStatus.OK).json(formatResponse<string>('Password changed successfully'));
+            await this.userService.changePassword(userId, model);
+            res.status(HttpStatus.OK).json(formatResponse<string>(`Password of user ${model.user_id} changed successfully`));
         } catch (error) {
             next(error);
         }

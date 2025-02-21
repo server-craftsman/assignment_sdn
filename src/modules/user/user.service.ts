@@ -103,24 +103,23 @@ export default class UserService {
         return user;
     }
 
-    public async changePassword(model: ChangePasswordDto): Promise<boolean> {
+    public async changePassword(userId: string, model: ChangePasswordDto): Promise<boolean> {
         if (isEmptyObject(model)) {
             throw new HttpException(HttpStatus.BAD_REQUEST, 'Model data is empty');
         }
 
-        const userId = model.user_id;
-    // check user exits
-    const user = await this.getUserById(userId, false);
-    if (!user.password) {
-        throw new HttpException(HttpStatus.BAD_REQUEST, `User created by google cannot change password.`);
-    }
-    // check old_password
-    if (model.old_password) {
-        const isMatchPassword = await bcryptjs.compare(model.old_password, user.password!);
-        if (!isMatchPassword) {
-            throw new HttpException(HttpStatus.BAD_REQUEST, `Your old password is not valid!`);
+        // check user exits
+        const user = await this.getUserById(userId, false);
+        if (!user.password) {
+            throw new HttpException(HttpStatus.BAD_REQUEST, `User created by google cannot change password.`);
         }
-    }
+        // check old_password
+        if (model.old_password) {
+            const isMatchPassword = await bcryptjs.compare(model.old_password, user.password!);
+            if (!isMatchPassword) {
+                throw new HttpException(HttpStatus.BAD_REQUEST, `Your old password is not valid!`);
+            }
+        }
     // compare new_password vs old_password
     if (model.new_password === model.old_password) {
         throw new HttpException(HttpStatus.BAD_REQUEST, `New password and old password must not be the same!`);
@@ -137,10 +136,11 @@ export default class UserService {
         }
     );
     if (!updateResult.acknowledged) {
-        throw new HttpException(HttpStatus.BAD_REQUEST, 'Change password failed!');
+            throw new HttpException(HttpStatus.BAD_REQUEST, 'Change password failed!');
+        }
+        return true;
     }
-    return true;
-}
+
     public async updateUser(userId: string, model: UpdateUserDto): Promise<IUser> {
         if (isEmptyObject(model)) {
             throw new HttpException(HttpStatus.BAD_REQUEST, 'Model data is empty');

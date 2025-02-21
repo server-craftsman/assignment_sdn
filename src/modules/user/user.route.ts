@@ -18,6 +18,13 @@ export default class UserRoute implements IRoute {
 
     private initializeRoutes() {
 
+        // POST domain:/api/users/generate-user -> Generate user admin
+        this.router.post(
+            API_PATH.GENERATE_USER,
+            authMiddleWare([], true),
+            this.userController.generateUser,
+        );
+
         // POST domain:/api/users -> Create normal user
         this.router.post(
             API_PATH.CREATE_USER,
@@ -42,20 +49,24 @@ export default class UserRoute implements IRoute {
         // PUT domain:/api/users/:id -> Update user info
         this.router.put(
             `${this.path}/:id`,
-            authMiddleWare([UserRoleEnum.ADMIN]),
+            authMiddleWare(),
             this.userController.updateUser,
         );
 
-        // PUT domain:/api/users/change-password -> Change user password
+        // PUT domain:/api/users/:id/change-password -> Change user password
         this.router.put(
-            API_PATH.CHANGE_PASSWORD,
+            `${this.path}/:id/change-password`,
             authMiddleWare(),
             validationMiddleware(ChangePasswordDto),
             this.userController.changePassword,
         );
 
         // POST domain:/api/users/:id -> Delete user logic
-        this.router.delete(`${this.path}/:id`, authMiddleWare([UserRoleEnum.ADMIN]), this.userController.deleteUser);
+        this.router.delete(
+            `${this.path}/:id`,
+            authMiddleWare([UserRoleEnum.ADMIN]),
+            this.userController.deleteUser,
+        );
 
         
     }

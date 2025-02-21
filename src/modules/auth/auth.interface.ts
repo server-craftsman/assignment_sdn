@@ -7,7 +7,8 @@ export interface DataStoredInToken {
 }
 
 export interface TokenData {
-    token: string;
+    access_token: string;
+    refresh_token: string;
 }
 
 export const UserInfoInTokenDefault = {

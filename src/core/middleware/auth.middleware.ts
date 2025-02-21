@@ -1,6 +1,6 @@
 import { NextFunction, Request, RequestHandler, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { DataStoredInToken } from '../../modules/auth';
+import { DataStoredInToken, TokenData } from '../../modules/auth';
 import { UserRole, UserSchema } from '../../modules/user';
 import { HttpStatus } from '../enums';
 import { logger } from '../utils';
@@ -51,7 +51,7 @@ const handleCheckToken = async (
             req.user.version = userToken.version;
 
             // check user version
-            const user = await userSchema.findOne({ _id: userToken.id }).lean();
+            const user = await userSchema.findOne({ _id: userToken.id }).lean(); // find user by id
             if (!user || String(user?.token_version) !== String(userToken.version)) {
                 res.status(HttpStatus.FORBIDDEN).json({ message: 'Access denied: invalid token!' });
                 return;

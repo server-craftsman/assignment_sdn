@@ -4,10 +4,11 @@ import { HttpStatus } from '../../core/enums';
 import { HttpException } from '../../core/exceptions';
 import { createToken, isEmptyObject, encodePasswordUserNormal, createTokenVerifiedUser } from '../../core/utils';
 import { IUser, UserSchema } from '../user';
-import { TokenData } from './auth.interface';
+import { DataStoredInToken, TokenData } from './auth.interface';
 import LoginDto from './dtos/login.dto';
 import RegisterDto from '../user/dtos/register.dto';
 import { v4 as uuidv4 } from "uuid";
+import jwt from 'jsonwebtoken'; // Import jwt
 
 export default class AuthService {
     public userSchema = UserSchema;
@@ -24,7 +25,6 @@ export default class AuthService {
             throw new HttpException(HttpStatus.BAD_REQUEST, `Your email: ${emailCheck} is not exists.`);
         }
 
-
         // login normal
         if (model.password) {
             const isMatchPassword = await bcryptjs.compare(model.password, user.password!); // compare password user input with user password in database
@@ -37,7 +37,13 @@ export default class AuthService {
             user.token_version = 0;
         }
 
-        return createToken(user);
+        const tokenData = createToken(user);
+
+        // Save the refresh token to the user record
+        user.refresh_token = tokenData.refresh_token;
+        await user.save();
+
+        return tokenData;
     }
 
     public async getCurrentLoginUser(userId: string): Promise<IUser> {
@@ -46,6 +52,7 @@ export default class AuthService {
             throw new HttpException(HttpStatus.BAD_REQUEST, `User is not exists.`);
         }
         delete user.password;
+        delete user.refresh_token;
         return user;
     }
 
@@ -62,5 +69,32 @@ export default class AuthService {
 
         await user.save();
         return true;
+    }
+
+    public async refreshToken(refresh_token: string): Promise<TokenData> {
+
+        if (!refresh_token) {
+            throw new HttpException(HttpStatus.BAD_REQUEST, 'Refresh token is required');
+        }
+        
+        try {
+            const secret = process.env.JWT_TOKEN_SECRET!;
+            const userToken = jwt.verify(refresh_token, secret) as DataStoredInToken;
+
+            const user = await this.userSchema.findById(userToken.id);
+            if (!user || user.token_version !== userToken.version) {
+                throw new HttpException(HttpStatus.BAD_REQUEST, 'Invalid refresh token');
+            }
+
+            // Generate a new access token only
+            const accessToken = createToken(user).access_token;
+            delete user.refresh_token;
+            
+            // Return the new access token while keeping the existing refresh token
+            return {access_token: accessToken, refresh_token: refresh_token!};
+            
+        } catch (error) {
+            throw new HttpException(HttpStatus.BAD_REQUEST, 'Invalid refresh token');
+        }
     }
 }

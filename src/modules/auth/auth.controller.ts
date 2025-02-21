@@ -13,6 +13,7 @@ export default class AuthController {
         try {
             const model: LoginDto = req.body;
             const tokenData: TokenData = await this.authService.login(model);
+
             res.status(HttpStatus.OK).json(formatResponse<TokenData>(tokenData));
         } catch (error) {
             next(error);
@@ -34,6 +35,15 @@ export default class AuthController {
             res.status(HttpStatus.OK).json(formatResponse<string>('Logout successfully'));
         } catch (error) {
             next(error);
+        }
+    };
+
+    public refreshToken = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const tokenData: TokenData = await this.authService.refreshToken(req.body.refresh_token);
+            res.status(HttpStatus.OK).json(formatResponse<TokenData>(tokenData));
+        } catch (error) {
+            next(error);    
         }
     };
 }

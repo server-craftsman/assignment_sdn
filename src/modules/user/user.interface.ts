@@ -13,11 +13,8 @@ export interface IUser extends Document {
     phone_number?: string; // default empty
     avatar_url?: string; // url
     dob?: Date; // date of birth, default new Date()
-
-    // check verify
-    // is_verified?: boolean; // default false,
-    // token?: string; // default uuidv4()
-    // token_expires?: Date; // default new Date()
+    access_token?: string;
+    refresh_token?: string;
     token_version: number; // default 0
 
     created_at?: Date; // default new Date()
