@@ -1,0 +1,351 @@
+openapi: 3.0.0
+info:
+  title: Nguyễn Đan Huy - Phật tử của Chùa Hoằng Pháp Trung Ương, huyện Củ Chi, TP HCM
+  version: 2.0.0
+  description: Assignment Final - SDN - Set-up through Swagger, JWT, Mongoose, Express, NodeJS, TypeScript, logging, error handling, validation, and more.
+
+servers:
+  - url: http://localhost:8090
+    description: Development server
+
+paths:
+  /api/auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Login a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginDto'
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenData'
+        '401':
+          description: Unauthorized
+
+  /api/auth/logout:
+    get:
+      tags:
+        - Auth
+      summary: Logout a user
+      responses:
+        '200':
+          description: Successful logout
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Logout successfully
+
+  /api/auth/refresh-token:
+    post:
+      tags:
+        - Auth
+      summary: Refresh access token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refresh_token:
+                  type: string
+      responses:
+        '200':
+          description: New access token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenData'
+        '400':
+          description: Invalid refresh token
+
+  /api/categories:
+    get:
+      tags:
+        - Categories
+      summary: Retrieve a list of categories
+      responses:
+        '200':
+          description: A list of categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+    post:
+      tags:
+        - Categories
+      summary: Create a new category
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCategoryDto'
+      responses:
+        '201':
+          description: Category created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+
+  /api/categories/{id}:
+    get:
+      tags:
+        - Categories
+      summary: Retrieve a category by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A category object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+    put:
+      tags:
+        - Categories
+      summary: Update a category by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCategoryDto'
+      responses:
+        '200':
+          description: Updated category
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+    delete:
+      tags:
+        - Categories
+      summary: Delete a category by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Category deleted
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Delete category successfully
+
+  /api/products:
+    get:
+      tags:
+        - Products
+      summary: Retrieve a list of products
+      responses:
+        '200':
+          description: A list of products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+    post:
+      tags:
+        - Products
+      summary: Create a new product
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProductDto'
+      responses:
+        '201':
+          description: Product created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+
+  /api/products/{id}:
+    get:
+      tags:
+        - Products
+      summary: Retrieve a product by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A product object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+    put:
+      tags:
+        - Products
+      summary: Update a product by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProductDto'
+      responses:
+        '200':
+          description: Updated product
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+    delete:
+      tags:
+        - Products
+      summary: Delete a product by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Product deleted
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Delete product successfully
+
+components:
+  schemas:
+    LoginDto:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+
+    TokenData:
+      type: object
+      properties:
+        access_token:
+          type: string
+        refresh_token:
+          type: string
+
+    Category:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        products:
+          type: array
+          items:
+            type: string
+
+    CreateCategoryDto:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+
+    UpdateCategoryDto:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+
+    Product:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        category_id:
+          type: string
+        price:
+          type: number
+        discount:
+          type: number
+        description:
+          type: string
+        image_url:
+          type: string
+
+    CreateProductDto:
+      type: object
+      properties:
+        name:
+          type: string
+        category_id:
+          type: string
+        price:
+          type: number
+        discount:
+          type: number
+        description:
+          type: string
+        image_url:
+          type: string
+
+    UpdateProductDto:
+      type: object
+      properties:
+        name:
+          type: string
+        category_id:
+          type: string
+        price:
+          type: number
+        discount:
+          type: number
+        description:
+          type: string
+        image_url:
+          type: string

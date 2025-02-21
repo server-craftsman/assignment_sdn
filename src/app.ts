@@ -6,6 +6,9 @@ import connectDB from "./database";
 import { ErrorMiddleware } from "./core/middleware";
 import { IRoute } from "./core/interfaces";
 import { logger } from "./core/utils";
+import swaggerUi from 'swagger-ui-express';
+import path from "path";
+import YAML from 'yamljs';
 
 export default class App {
     public app: express.Application;
@@ -16,6 +19,7 @@ export default class App {
         this.initializeMiddlewares();
         this.connectToDatabase();
         this.initializeRoutes(routes);
+        this.initializeSwagger();
         this.port = process.env.PORT || 5000;
         this.initializeErrorHandling();
     }
@@ -54,5 +58,23 @@ export default class App {
             this.app.use('/', route.router);
         });
 
+        // config for swagger
+        this.app.use('/swagger', express.static(path.join(__dirname, '../node_modules/swagger-ui-dist')));
+
+    }
+
+    private initializeSwagger() {
+        const swaggerPath = path.join(__dirname, '../swagger.yaml');
+        const swaggerDocument = YAML.load(swaggerPath);
+        swaggerDocument.host = process.env.DOMAIN_API;
+        this.app.use(
+            '/api-docs',
+            swaggerUi.serve,
+            swaggerUi.setup(swaggerDocument, {
+                swaggerOptions: {
+                    url: '/swagger/swagger.yaml',
+                },
+            }),
+        );
     }
 }
