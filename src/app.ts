@@ -22,6 +22,7 @@ export default class App {
         this.initializeSwagger();
         this.port = process.env.PORT || 5000;
         this.initializeErrorHandling();
+        this.initializeTemplateEngine();
     }
 
     public listen(): void {
@@ -61,6 +62,11 @@ export default class App {
         // config for swagger
         this.app.use('/swagger', express.static(path.join(__dirname, '../node_modules/swagger-ui-dist')));
 
+    }
+
+    private initializeTemplateEngine() {
+        this.app.set('view engine', 'ejs');
+        this.app.set('views', path.join(__dirname, './views'));
     }
 
     private initializeSwagger() {
